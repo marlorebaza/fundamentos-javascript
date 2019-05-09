@@ -166,7 +166,3 @@ console.log(name); // Lula, "this.name" es su equivalente
     console.log(mazda.getDiscount()); // 7500
 })();
 
-
-// ACA ME QUEDO: 
-// - ES UN NUEVO TEMA, ASINCRONISMO:
-// https://platzi.com/clases/1339-fundamentos-javascript/12956-funciones-como-parametros/
