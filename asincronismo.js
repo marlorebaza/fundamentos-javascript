@@ -28,8 +28,72 @@ setTimeout(() => console.log("D"), 2000);
 for (let i = 0; i < 10000000000; i++) {}
 // Esto provocará que la función callback de setTimeout se ejecute después de varios segundos,
 // es decir el tiempo indicado es una espera mínima.
-
 */
+
+// Ejemplo 3 - Consumo de servicio REST externo
+const URL_BASE = "https://swapi.co/api/";
+const PEOPLE_PATH = "people/";
+const options = {crossDomain: true};
+// función callback que serà llamada cuando el servicio REST responda
+/*
+$.get(`${URL_BASE}${PEOPLE_PATH}`, options, function(data, textStatus, jqXHR) {
+    if (data.results) {
+        for (var datum of data.results ) {
+            console.log(`Nombre: ${datum.name}`);
+        }
+    }
+});
+*/
+
+
+// Ejemplo 4 - Consumo de servicio REST multiples veces.
+// Con este ejemplo podemos ver que las peticiones no responden en el mismo orden que se invocan,
+// esto debido a que la ejecución es asincrona y se resolverán dependiendo del servidor
+function obtenerPersona(id) {
+    $.get(`${URL_BASE}${PEOPLE_PATH}${id}`, options, function(data, textStatus, jqXHR) {
+        console.log(`id: ${id} - nombre: ${data.name}`);
+    });
+}
+/*
+obtenerPersona(1);
+obtenerPersona(2);
+obtenerPersona(3);
+obtenerPersona(4);
+*/
+
+
+// Ejemplo 5 - Controlando el orden de respuesta
+// Haciendo uso de una cadena de callbacks mantenemos el orden, pero perdemos el paralelismo en la invocación
+function obtenerPersona2(id, callback) {
+    $
+        .get(`${URL_BASE}${PEOPLE_PATH}${id}`, options, function(data, textStatus, jqXHR) {
+            console.log(`id: ${id} - nombre: ${data.name}`);
+            if (callback) {
+                callback();
+            }
+        })
+        // dato en chrome para emular este error: 
+        // limpiar cache del navegador, ir a pestaña de network, deshabilitar cache y mientras
+        // se estén realziando las peticiones activar offline 
+        .fail(function() {
+            console.log("Ocurrió un error");
+        });
+}
+obtenerPersona2(1, function() {
+    obtenerPersona2(2, function() { 
+        obtenerPersona2(3, function() { 
+            obtenerPersona2(4);
+        });
+    });
+});
+
+
+// Ejemplo 6 - Promesas (para evitar el "callback hell" -  infierno de callbacks)
+
+
+
+
 // ACA ME QUEDO: 
 // - ES UN NUEVO TEMA, ASINCRONISMO:
-// https://platzi.com/clases/1339-fundamentos-javascript/12959-callbacks8214/
+// https://platzi.com/clases/1339-fundamentos-javascript/12963-promesas9741/
+

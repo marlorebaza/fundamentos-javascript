@@ -60,7 +60,7 @@ arrowFunction2("Marlo");
                 // ... a diferencia que en una declaración de función, donde el valor de "this" dependerá de donde
                 // sea invocada la función. En este caso hará referencia al objeto global, donde no existe
                 // la variable "value"
-                debugger;
+                //debugger;
                 console.log(`termino timeout. this.value = ${this.value}`); // undefined
             }, 2000);
         }
