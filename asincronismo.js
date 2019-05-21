@@ -89,9 +89,30 @@ obtenerPersona2(1, function() {
 
 
 // Ejemplo 6 - Promesas (para evitar el "callback hell" -  infierno de callbacks)
+// FUENTE: https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Promise
+// ACA ME QUEDO... ENTENDER MEJOR... PARECE QUE EL TIMEOUT NO ESTA FUNCANDO.. MMM.. VER EJEMPLO EN MOZILLA
+// O BUSCA PROMISE EN GOOGLE Y LEETE UN FORO.. DESPUES YA TERMINAS DE VER EL VIDEO Y HACES UN RESUMEN BIEN BACAN
+var myPromise = new Promise((resolve, reject) => {
+    setTimeout(resolve("oki doki!"), 20000);
+});
 
-
-
+myPromise.then((data => {
+    console.log(`Operación 1 correcta. resultado = ${data}`);
+    setTimeout(() => {}, 20000);
+})).catch((error) => {
+    console.log(`Operación 1 errónea. resultado = ${error}`);
+}).then((data) => {
+    console.log(`Operación 2 correcta. resultado = ${data}`);
+    throw new Error("Horrror!");
+}).catch((error) => {
+    console.log(`Operación 2 errónea. resultado = ${error}`);
+}).then((data) => {
+    console.log(`Operación 3 correcta. resultado = ${data}`);
+    setTimeout(() => {}, 7000);
+}, (error) => {
+    console.log(`Operación 3 errónea. resultado = ${error}`);
+    return "se controló el error en la operación 3";
+}).finally((data) => {console.log(`Fin de operación 3 correcta. resultado = ${data}`);});
 
 // ACA ME QUEDO: 
 // - ES UN NUEVO TEMA, ASINCRONISMO:
