@@ -54,6 +54,7 @@ function obtenerPersona(id) {
         console.log(`id: ${id} - nombre: ${data.name}`);
     });
 }
+// Lo comenté intencionalmente
 /*
 obtenerPersona(1);
 obtenerPersona(2);
@@ -79,6 +80,8 @@ function obtenerPersona2(id, callback) {
             console.log("Ocurrió un error");
         });
 }
+// Lo comenté intencionalmente
+/*
 obtenerPersona2(1, function() {
     obtenerPersona2(2, function() { 
         obtenerPersona2(3, function() { 
@@ -86,34 +89,69 @@ obtenerPersona2(1, function() {
         });
     });
 });
-
+*/
 
 // Ejemplo 6 - Promesas (para evitar el "callback hell" -  infierno de callbacks)
 // FUENTE: https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Promise
-// ACA ME QUEDO... ENTENDER MEJOR... PARECE QUE EL TIMEOUT NO ESTA FUNCANDO.. MMM.. VER EJEMPLO EN MOZILLA
-// O BUSCA PROMISE EN GOOGLE Y LEETE UN FORO PARA ENTENDER LA CADENA DE PROMESAS COMO FUNCIONA.. 
-// DESPUES YA TERMINAS DE VER EL VIDEO Y HACES UN RESUMEN BIEN BACAN
+
+// Probamos como funciona la cadena de promesas:
 var myPromise = new Promise((resolve, reject) => {
-    setTimeout(resolve("oki doki!"), 20000);
+    setTimeout(function() {resolve("oki doki!");}, 3000);
+});
+myPromise.then((data => {
+    console.log(`[THEN 1] - Operación correcta. resultado = ${data}`);
+    return "VALOR 1";
+})).catch((error) => {
+    console.log(`[CATCH 1] - Operación 1 errónea. resultado = ${error}`);
+}).then((data) => {
+    console.log(`[THEN 2] - Operación correcta. resultado = ${data}`);
+    throw new Error("ERRROR 1");
+}).catch((error) => {
+    console.log(`[CATCH 2] - Operación errónea. resultado = ${error}`);
+    //return "VALOR 2";
+    throw new Error("ERRROR 2");
+}).then((data) => {
+    console.log(`[THEN 3] - Operación correcta. resultado = ${data}`);
+    return "VALOR 3";
+}, (error) => {
+    console.log(`[CATCH 3] - Operación errónea. resultado = ${error}`);
+}).finally((data) => {
+    // finally no recibe el valor retornado por el then / catch previo
+    console.log(`[FINALLY] - Fin de operación. resultado = ${data}`);
 });
 
-myPromise.then((data => {
-    console.log(`Operación 1 correcta. resultado = ${data}`);
-    setTimeout(() => {}, 20000);
-})).catch((error) => {
-    console.log(`Operación 1 errónea. resultado = ${error}`);
-}).then((data) => {
-    console.log(`Operación 2 correcta. resultado = ${data}`);
-    throw new Error("Horrror!");
-}).catch((error) => {
-    console.log(`Operación 2 errónea. resultado = ${error}`);
-}).then((data) => {
-    console.log(`Operación 3 correcta. resultado = ${data}`);
-    setTimeout(() => {}, 7000);
-}, (error) => {
-    console.log(`Operación 3 errónea. resultado = ${error}`);
-    return "se controló el error en la operación 3";
-}).finally((data) => {console.log(`Fin de operación 3 correcta. resultado = ${data}`);});
+// A tener en cuenta el comportamiento de los siguientes 2 puntos:
+// - .then(onFulfilled).catch(onRejected)
+new Promise((resolve, reject) => {
+    setTimeout(function() {resolve("HOLA!");}, 4000);
+}).then(function(data) {
+    throw new Error("ERROR");
+}).catch(function(error) {
+    // Este catch capturará cualquier error previo
+    console.log(`Error controlado: ${error}`);
+});
+// - .then(onFulfilled[, onRejected]) (Lo comenté para evitar el error de "error no controlado")
+/*
+new Promise((resolve, reject) => {
+    setTimeout(function() {resolve("HOLA!");}, 4000);
+}).then(function(data) {
+    throw new Error("ERROR"); // este error no será capturado por la función "onRejected"
+}, function(error) {
+    // Esta función "onRejected" capturará errores previos, pero no los errores
+    // que surjan en su función adjunta "onFulfilled"
+    console.log(`Error controlado: ${error}`);
+});
+*/
+
+/*
+NOTA:
+- en caso no se controle un error (haciendo uso de un catch) en Node arrojará la siguiente excepción:
+"UnhandledPromiseRejectionWarning: Unhandled promise rejection" y en un navegador: "Uncaught (in promise)"
+*/
+
+
+// ACA ME QUEDO: TERMINAR DE VER EL VIDEO Y HACER LA IMPLEMENTACION DE PROMESAS CON GET DE JQUERY
+
 
 // ACA ME QUEDO: 
 // - ES UN NUEVO TEMA, ASINCRONISMO:
