@@ -91,7 +91,7 @@ obtenerPersona2(1, function() {
 });
 */
 
-// Ejemplo 6 - Promesas (para evitar el "callback hell" -  infierno de callbacks)
+// Promesas (para evitar el "callback hell" -  infierno de callbacks)
 // FUENTE: https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/Promise
 
 // Probamos como funciona la cadena de promesas:
@@ -145,15 +145,170 @@ new Promise((resolve, reject) => {
 
 /*
 NOTA:
-- en caso no se controle un error (haciendo uso de un catch) en Node arrojará la siguiente excepción:
+- Cualquier error surgido en la cadena de promesas será controlado por el .catch(...) más próxima.
+En caso no se controle un error (haciendo uso de un catch) en Node arrojará la siguiente excepción:
 "UnhandledPromiseRejectionWarning: Unhandled promise rejection" y en un navegador: "Uncaught (in promise)"
 */
 
 
-// ACA ME QUEDO: TERMINAR DE VER EL VIDEO Y HACER LA IMPLEMENTACION DE PROMESAS CON GET DE JQUERY
+// Aplicando promesas para controlar el orden de respuesta
+function obtenerPersona3(id) {
+    return new Promise((resolve, reject) => {
+        $
+            .get(`${URL_BASE}${PEOPLE_PATH}${id}`, options, resolve)
+            .fail(function(er) {
+                console.log(er);
+                reject(id);
+            });
+    });
+}
+// comentado intencionalmente
+/*
+obtenerPersona3(1)
+    .then(persona1 => {
+        console.log(`Nombre de persona 1: ${persona1.name}`)
+        return obtenerPersona3(2);
+    })
+    .then(persona2 => {
+        console.log(`Nombre de persona 2: ${persona2.name}`)
+        return obtenerPersona3(3);
+    })
+    .then(persona3 => {
+        console.log(`Nombre de persona 3: ${persona3.name}`)
+        return obtenerPersona3(4);
+    })
+    .then(persona4 => {
+        console.log(`Nombre de persona 4: ${persona4.name}`)
+        return obtenerPersona3(5);
+    })
+    .then(persona5 => {
+        console.log(`Nombre de persona 5: ${persona5.name}`)
+        return obtenerPersona3(6);
+    })
+    .then(persona6 => {
+        console.log(`Nombre de persona 6: ${persona6.name}`)
+    })
+    // Este catch controlará cualquier error surgido en la cadena
+    .catch(onPersonaError);
 
+*/
+function onPersonaError(id) {
+    console.log(`Ocurrió un error al obtener persona con id: ${id}`);
+}
+
+
+// Una mejor forma de controlar el orden de respuesta
+let ids = [1,2,3,4,6,7,8];
+// tarnsformamos ids a promesas
+let promises = ids.map(obtenerPersona3);
+Promise
+    // all: crea una promesa que es resuelta con todas las promesas dentro del arreglo proporcionado
+    .all(promises)
+    // si todas las promesas son resueltas correctamente llamará a .then(...)
+    .then(function(personas) {
+        personas.forEach(function(persona) {
+            console.log(`Nombre de persona: ${persona.name}`)
+        });
+    })
+    // si una promesa es rechaza por un error, será controlado por un .catch(...)
+    .catch(onPersonaError);
+
+
+// Async -  await
+// FUENTES:
+// - https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Sentencias/funcion_asincrona
+// - https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Operadores/await
+/*
+Una función async devuelve un objeto Promise, es decir si retorna un valor, entonces la promesa se resolverá 
+con el valor devuelto, en caso que genere una excepción se rechazará con el valor generado.
+
+Una función async puede contener una expresión await, la cual pausa la ejecución de la 
+función asíncrona y espera la resolución de la Promise pasada (o cualquier sentencia) y, a continuación, 
+reanuda la ejecución de la función.
+
+La finalidad de las funciones async/await es simplificar el comportamiento del uso síncrono de promesas 
+y realizar algún comportamiento específico en un grupo de Promises. 
+El código será menos "inteligente" (o elegante), pero será claro, legible y prolijo.
+*/
+// Ejemplo 1: await esperando una suma
+async function mySimpleAsync() {
+    return await 10 + 20;
+}  
+mySimpleAsync()
+    .then(data => console.log(`mySimpleAsync resolved: ${data}`));
+// Ejemplo 2: await esperando una promesa
+async function myPromiseAsync() {
+    return await new Promise(resolve => resolve(10 + 20));
+}  
+myPromiseAsync()
+    .then(data => console.log(`myPromiseAsync resolved: ${data}`));
+// Ejemplo 3: Controlando error por fuera
+async function mySimpleAsyncError() {
+    throw new Error("error!");
+}  
+mySimpleAsyncError()
+    .catch(error => console.log(`mySimpleAsyncError rejected: ${error}`));
+// Ejemplo 4: Controlando error estandar dentro de función asincrona
+(async function() {
+    try {
+        throw new Error("error!");
+    } catch (error) {
+        console.log(`async. error controlado: ${error}`)
+    }
+} )();
+// Ejemplo 5: Controlando error de promesa dentro de función asincrona
+(async function() {
+    try {
+        await new Promise((resolve, reject) => reject("error!"));
+    } catch (error) {
+        console.log(`async. error promesa controlado: ${error}`)
+    }
+} )();
+// Ejemplo 6: async-await VS promise
+// Dado que los métodos usados en este ejemplo no existen lo encierro en un bloque de comentario para evitar error:
+/*
+// - solución usando promesas
+function getProcessedData(url) {
+    return downloadData(url) // ejecutamos promesa
+        .catch(e => {
+            return downloadFallbackData(url)  // controlamos error
+        })
+        .then(v => {
+            return processDataInWorker(v); // resolvemos
+        });
+}
+// - solución usando async - await
+async function getProcessedData(url) {
+    let v;
+    try {
+      v = await downloadData(url); // ejecutamos y esperamos promesa
+    } catch(e) {
+      v = await downloadFallbackData(url); // controlamos error
+    }
+    return processDataInWorker(v); // resolvemos
+}
+*/
+// Nota: Ambos métodos devuelven una promesa
+
+
+// Controlamos el orden de respuesta usando async - await
+(async function() {
+    let ids = [1,2,3,4,6,7,8];
+    let promises = ids.map(obtenerPersona3);
+    var personas;
+    try {
+        personas = await Promise.all(promises);
+    } catch (error) {
+        onPersonaError(error);
+    }
+    if (personas) {
+        personas.forEach(function(persona) {
+            console.log(`[async - await] Nombre de persona: ${persona.name}`)
+        });
+    }
+})();
 
 // ACA ME QUEDO: 
 // - ES UN NUEVO TEMA, ASINCRONISMO:
-// https://platzi.com/clases/1339-fundamentos-javascript/12963-promesas9741/
+// https://platzi.com/clases/1339-fundamentos-javascript/12967-comenzando-el-juego/
 
