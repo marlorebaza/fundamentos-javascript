@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            position: relative;
+        }
+        .blue {
+            background-color: blue;
+        }
+        .blue.light {
+            background-color: #8686fb;
+        }
+        .gameboard {
+            border-radius: 50%;
+            height: 35vh;
+            overflow: hidden;
+            margin: 0 auto;
+            width: 25vw;
+        }
+        .gameboard button {
+            border: 1px solid black;
+            height: 40px;
+            left: calc(50% - 13.5vw);
+            position: absolute;
+            top: calc(50% - 20px);
+            width: 27vw;
+        }
+        .gameboard div {
+            height: 50%;
+            width: 50%;
+        }
+        .green {
+            background-color: green;
+        }
+        .green.light {
+            background-color: #74d074;
+        }
+        .hide {
+            display: none;
+        }
+        .left {
+            float: left;
+        }
+        /*
+        .light {
+            filter: brightness(150%);
+        }
+        */
+        .red {
+            background-color: red;
+        }
+        .red.light {
+            background-color: #fd5f5f;
+        }
+        .right {
+            float: right;
+        }
+        .yellow {
+            background-color: yellow;
+        }
+        .yellow.light {
+            background-color: #ffffb4;
+        }
+        * {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="gameboard">
+        <div id="red" class="red left" data-color="red"></div>
+        <div id="yellow" class="yellow right" data-color="yellow"></div>
+        <div id="blue" class="blue left" data-color="blue"></div>
+        <div id="green" class="green right" data-color="green"></div>
+        <button id="btnStartGame" onclick="startGame()">Empezar juego!</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8.12.1/dist/sweetalert2.all.min.js"></script>
+    <script>
+        const red = document.getElementById("red");
+        const yellow = document.getElementById("yellow");
+        const blue = document.getElementById("blue");
+        const green = document.getElementById("green");
+        const btnStartGame = document.getElementById("btnStartGame");
+        const LAST_LEVEL = 5;
+
+        class Game {
+            constructor(){
+                this.chooseColor = this.chooseColor.bind(this);
+                this.init();
+                this.generateRandomSequence();
+                setTimeout(() => this.nextLevel(), 500);
+            }
+            init() {
+                this.toogleBtnStartGame();
+                this.nivel = 1;
+                this.colors = {
+                    red,
+                    yellow,
+                    blue,
+                    green
+                }
+            }
+            toogleBtnStartGame() {
+                if (btnStartGame.classList.contains("hide")) {
+                    btnStartGame.classList.remove("hide");
+                } else {
+                    btnStartGame.classList.add("hide");
+                }
+            }
+            generateRandomSequence() {
+                // map() no se puede aplicar sobre undefined x eso inicializamos todos los valores del arreglo
+                // con "0", haciendo uso de fill() 
+                this.sequence = new Array(LAST_LEVEL).fill(0).map(e => Math.floor(Math.random() * 4));
+            }
+            nextLevel() {
+                this.subNivel = 0;
+                this.lightenSequence();
+                this.addClickEventToColors();
+            }
+            lightenSequence() {
+                for (let i = 0; i < this.nivel; i++) {
+                    // si no haremos una reasignación de valor a una variable, declararlo con "const"
+                    const color = this.convertNumberToColor(this.sequence[i]);
+                    setTimeout(() => this.lightColor(color), 1000 * i);
+                } 
+            }
+            lightColor(color) {
+                this.colors[color].classList.add("light");
+                setTimeout(() => this.unlightColor(color), 350);
+            }
+            unlightColor(color) {
+                this.colors[color].classList.remove("light");
+            }
+            convertNumberToColor(number) {
+                switch (number) {
+                    case 0:
+                        return "red";
+                    case 1:
+                        return "yellow";
+                    case 2:
+                        return "blue";
+                    default:
+                        return "green";
+                }
+            } 
+            converColorToNumber(color) {
+                switch (color) {
+                    case "red":
+                        return 0;
+                    case "yellow":
+                        return 1;
+                    case "blue":
+                        return 2;
+                    default:
+                        return 3;
+                }
+            }
+            addClickEventToColors() {
+                this.colors.red.addEventListener("click", this.chooseColor);
+                this.colors.yellow.addEventListener("click", this.chooseColor);
+                this.colors.blue.addEventListener("click", this.chooseColor);
+                this.colors.green.addEventListener("click", this.chooseColor);
+            }
+            removeClickEventToColors() {
+                this.colors.red.removeEventListener("click", this.chooseColor);
+                this.colors.yellow.removeEventListener("click", this.chooseColor);
+                this.colors.blue.removeEventListener("click", this.chooseColor);
+                this.colors.green.removeEventListener("click", this.chooseColor);
+            }
+            chooseColor(event) {
+                /*
+                    Sobre dataset:
+                    FUENTE: https://developer.mozilla.org/es/docs/Web/API/HTMLElement/dataset
+                    - Almacena los atributos custmizados a un elemento en el DOM. Es posible
+                    agregar y setear sus valores
+                    - Convención de nombre: 
+                    En HTML es dash-style y en JS es camelCase.
+                    Por ejemplo: 
+                    1. dash-style a camelCase
+                    <div id="d1" data-my-value=":D"></diV>
+                    Se recuperará en JS: document.getElementById("d1").dataset.myValue
+                    El prefijo "data-" es remvido
+                    2. camelCase a dash-style
+                    Y document.getElementById("d1").dataset.anotherValue = "xD"
+                    en HTML será <div id="d1" another-value="xD"></diV>
+                    El prefijo "data-" es agregado
+                    - Los atributos pueden ser leídos, escritos o eliminados igual que una propiedad de objeto:
+                    element.dataset.keyname
+                    element.dataset[keyname]
+                    delete element.dataset.keyname
+                    - El operador "in" tbn puede ser usado: "someProperty" in element.dataset
+                    - Cuando un atributo es seteado, su siempre será convertido a cadena.
+                    Por ejemplo null será convertido a "null".
+
+                */
+                const color = event.target.dataset.color;
+                const colorNumber = this.converColorToNumber(color);
+                this.lightColor(color);
+                if (colorNumber === this.sequence[this.subNivel]) {
+                    this.subNivel++;
+                    if (this.subNivel === this.nivel) {
+                        this.removeClickEventToColors();
+                        if (this.nivel === LAST_LEVEL) {
+                            Swal.fire(
+                                "My Game",
+                                "Ganaster! :)",
+                                "success").then(() => this.init());
+                        } else {
+                            this.nivel++;
+                            setTimeout(() => this.nextLevel(), 1000);
+                            // Otra alternativa de llamada:
+                            /*
+                            - Como podemos ver, aquí tenemos que enlazarle el "this" de la instancia actual,
+                            ya que al momento que se ejecute el callback, "this" será igual a "window".
+                            En cambio, las funciones flecha hacen referencia al comtexto (this) donde son definidas,
+                            no es necesario este enlace. Para más detalle ver funcion-flecha.js
+                            setTimeout(this.nextLevel.bind(this), 1000);
+                            */
+                        }
+                    }
+                } else {
+                    Swal.fire(
+                        "My Game",
+                        "Perdiste :(",
+                        "error").then(() => {
+                            this.removeClickEventToColors();
+                            this.init();
+                        });
+                }
+            }
+        }
+        function startGame() {
+            window.game = new Game();
+        }
+    </script>
+</body>
+</html>

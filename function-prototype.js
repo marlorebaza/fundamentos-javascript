@@ -96,6 +96,6 @@ console.log(apple); // Producto { name: 'manzana', price: 0.12 }
     // creamos una nueva función haciendo uso de .bind(...)
     let newPlusFunction = someobject.plus.bind({someNumber: 20}, 100);
     // el valor "100" siempre se asignará al primer parámetro cada vez que se llame a la función "newPlusFunction".
-    // En este ejemplo el valor "14" será el tercer parámetro
+    // En este ejemplo el valor "12" se asignará al segundo parámetro y "14" al tercer parámetro (que no existe)
     console.log(`suma 2 = ${newPlusFunction(12, 14)}`); // 20 + 100 + 12 = 132
 })();
