@@ -307,8 +307,3 @@ async function getProcessedData(url) {
         });
     }
 })();
-
-// ACA ME QUEDO: 
-// - ES UN NUEVO TEMA, ASINCRONISMO:
-// https://platzi.com/clases/1339-fundamentos-javascript/12967-comenzando-el-juego/
-
